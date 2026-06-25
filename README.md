@@ -48,16 +48,6 @@ Tools
 Mock lookups in tools/. customer_lookup is used by the escalation agent to fetch the
 customer's record. subscription_lookup is available for billing questions.
 
-Persistence
-
-State can be saved using a LangGraph SQLite checkpointer, keyed by ticket id, so runs can be
-resumed or inspected. Enable it by passing a checkpointer to compile():
-
-pythonfrom langgraph.checkpoint.sqlite import SqliteSaver
-
-with SqliteSaver.from_conn_string("checkpoints.sqlite") as cp:
-    app = workflow.compile(checkpointer=cp)
-
 Run
 
 - bashpip install -r requirements.txt
