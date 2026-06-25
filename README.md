@@ -61,5 +61,5 @@ with SqliteSaver.from_conn_string("checkpoints.sqlite") as cp:
 Run
 
 bashpip install -r requirements.txt
-# add GOOGLE_API_KEY to .env
+add GOOGLE_API_KEY to .env
 python main.py
