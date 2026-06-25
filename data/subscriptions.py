@@ -1,24 +1,31 @@
-from knowledge.account_kb import ACCOUNT_KNOWLEDGE
-from tools.customer_lookup import customer_lookup
+# Mock subscription / payment records, keyed by customer id.
 
-def account_agent(state):
-
-    msg = state["message"].lower()
-    findings = []
-
-    for k, v in ACCOUNT_KNOWLEDGE.items():
-        if k in msg:
-            findings.append(v)
-
-    personal_keywords = ["my plan", "my account", "my subscription", "what plan", "current plan"]
-    if any(kw in msg for kw in personal_keywords):
-        state["tools_used"].append("customer_lookup")
-        customer = customer_lookup(state["customer_id"])
-        if customer and "error" not in customer:
-            findings.append(f"Customer record: {customer}")
-
-
-
-    state["collected_knowledge"]["account"] = findings
-    state["routing_path"].append("account")
-    return {"collected_knowledge": {"account": findings}}
+SUBSCRIPTIONS = {
+    "C-500": {
+        "plan": "Pro",
+        "status": "active",
+        "billing_cycle": "monthly",
+        "price": "$29/month",
+        "next_billing_date": "2026-07-01",
+        "payment_method": "Visa ending 4242",
+        "last_payment": {"date": "2026-06-01", "amount": "$29.00", "status": "paid"},
+    },
+    "C-501": {
+        "plan": "Free",
+        "status": "active",
+        "billing_cycle": None,
+        "price": "$0",
+        "next_billing_date": None,
+        "payment_method": None,
+        "last_payment": None,
+    },
+    "C-502": {
+        "plan": "Enterprise",
+        "status": "past_due",
+        "billing_cycle": "annual",
+        "price": "$2,400/year",
+        "next_billing_date": "2026-06-15",
+        "payment_method": "Mastercard ending 8888",
+        "last_payment": {"date": "2025-06-15", "amount": "$2,400.00", "status": "failed"},
+    },
+}

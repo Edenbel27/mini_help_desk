@@ -3,24 +3,27 @@ import asyncio
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import Application, MessageHandler, CommandHandler, filters, ContextTypes
+from langgraph.checkpoint.sqlite import SqliteSaver
+from graph.workflow import build_app
 
 load_dotenv()
-
-from graph.workflow import app   # your compiled LangGraph app
-
 
 def run_ticket(message: str, user_id: int) -> str:
     initial_state = {
         "ticket_id": f"T-{user_id}",
-        # "customer_id": f"C-{user_id}",
-        "customer_id": "C-500",
+        "customer_id": "C-500",   # test customer
         "message": message,
         "domains": [],
         "collected_knowledge": {},
         "routing_path": [],
         "tools_used": [],
     }
-    result = app.invoke(initial_state)
+
+    with SqliteSaver.from_conn_string("checkpoints.sqlite") as checkpointer:
+        app = build_app(checkpointer=checkpointer)
+        config = {"configurable": {"thread_id": f"T-{user_id}"}}   
+        result = app.invoke(initial_state, config=config)
+
     return result.get("final_response", "Sorry, something went wrong.")
 
 

@@ -1,9 +1,9 @@
-from graph.workflow import app
-
+from graph.workflow import build_app
+from langgraph.checkpoint.sqlite import SqliteSaver
 initial_state = {
     "ticket_id": "T-1001",
     "customer_id": "C-500",
-    "message": "My account was hacked and someone changed my settings",
+    "message": "I am Eden. What plan am I on and when is my next payment due?",
 
     "category": "",
     "domains": [],
@@ -20,7 +20,13 @@ initial_state = {
     "tools_used": []
 }
 
-result = app.invoke(initial_state)
+# result = app.invoke(initial_state)
+
+with SqliteSaver.from_conn_string("checkpoints.sqlite") as checkpointer:
+    app = build_app(checkpointer=checkpointer)
+    config = {"configurable": {"thread_id": initial_state["ticket_id"]}}
+    result = app.invoke(initial_state, config=config)
+
 
 print("\nFINAL RESPONSE:\n")
 print(result["final_response"])

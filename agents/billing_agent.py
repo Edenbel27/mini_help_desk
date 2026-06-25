@@ -1,24 +1,26 @@
-from knowledge.account_kb import ACCOUNT_KNOWLEDGE
-from tools.customer_lookup import customer_lookup
+from knowledge.billing_kb import BILLING_KNOWLEDGE
+from tools.subscription_lookup import subscription_lookup
 
-def account_agent(state):
 
+def billing_agent(state):
     msg = state["message"].lower()
     findings = []
 
-    for k, v in ACCOUNT_KNOWLEDGE.items():
+    # search the billing knowledge base
+    for k, v in BILLING_KNOWLEDGE.items():
         if k in msg:
             findings.append(v)
 
-    personal_keywords = ["my plan", "my account", "my subscription", "what plan", "current plan"]
-    if any(kw in msg for kw in personal_keywords):
-        state["tools_used"].append("customer_lookup")
-        customer = customer_lookup(state["customer_id"])
-        if customer and "error" not in customer:
-            findings.append(f"Customer record: {customer}")
+    # for billing/payment questions, look up the customer's real subscription
+    billing_keywords = ["charge", "charged", "bill", "billing", "payment",
+                        "invoice", "refund", "subscription", "plan", "price"]
+    if any(kw in msg for kw in billing_keywords):
+        sub = subscription_lookup(state["customer_id"])
+        if "error" not in sub:
+            findings.append(f"Subscription record: {sub}")
 
-
-
-    state["collected_knowledge"]["account"] = findings
-    state["routing_path"].append("account")
-    return {"collected_knowledge": {"account": findings}}
+    return {
+        "collected_knowledge": {"billing": findings},
+        "routing_path": ["billing"],
+        "tools_used": ["billing_kb_search", "subscription_lookup"],
+    }

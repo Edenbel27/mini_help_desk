@@ -71,4 +71,5 @@ workflow.add_conditional_edges("escalation_check", route_escalation, {
 workflow.add_edge("escalation", "final")
 workflow.add_edge("final", END)
 
-app = workflow.compile()
+def build_app(checkpointer=None):
+    return workflow.compile(checkpointer=checkpointer)
